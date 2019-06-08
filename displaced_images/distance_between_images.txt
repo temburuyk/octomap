@@ -1,0 +1,1 @@
+distance_between_images = 13cm

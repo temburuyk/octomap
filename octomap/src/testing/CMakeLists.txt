@@ -28,8 +28,13 @@ if(BUILD_TESTING)
   ADD_EXECUTABLE(test_pruning test_pruning.cpp)
   TARGET_LINK_LIBRARIES(test_pruning octomap octomath)
 
-  ADD_EXECUTABLE(dep_image_to_bt dep_image_to_bt.cpp)
-  TARGET_LINK_LIBRARIES(dep_image_to_bt octomap octomath ${OpenCV_LIBS})
+  ADD_EXECUTABLE(dep_image_to_bt_multi_image dep_image_to_bt_multi_image.cpp)
+  TARGET_LINK_LIBRARIES(dep_image_to_bt_multi_image octomap octomath ${OpenCV_LIBS})
+
+  ADD_EXECUTABLE(dep_image_to_bt_single_image dep_image_to_bt_single_image.cpp)
+  TARGET_LINK_LIBRARIES(dep_image_to_bt_single_image octomap octomath ${OpenCV_LIBS})
+
+
 
   # CTest tests below
 

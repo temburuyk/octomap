@@ -1,3 +1,5 @@
+find_package( OpenCV REQUIRED )
+
 if(BUILD_TESTING)
   ADD_EXECUTABLE(test_raycasting test_raycasting.cpp)
   TARGET_LINK_LIBRARIES(test_raycasting octomap)
@@ -26,6 +28,8 @@ if(BUILD_TESTING)
   ADD_EXECUTABLE(test_pruning test_pruning.cpp)
   TARGET_LINK_LIBRARIES(test_pruning octomap octomath)
 
+  ADD_EXECUTABLE(dep_image_to_bt dep_image_to_bt.cpp)
+  TARGET_LINK_LIBRARIES(dep_image_to_bt octomap octomath ${OpenCV_LIBS})
 
   # CTest tests below
 

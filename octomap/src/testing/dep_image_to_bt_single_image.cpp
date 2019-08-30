@@ -19,7 +19,7 @@ using namespace octomath;
 
 int main(int argc, char** argv) {
 
-
+  // 1st Argument image location , 2nd argument inversion true or false
 	string image_name = "";
 	bool invert = false;
     if( argc < 2)
@@ -43,18 +43,19 @@ int main(int argc, char** argv) {
         return -1;
     }
     std::cout << image.rows <<" rows "<<image.cols<<" columns "<<int(image.at<uchar>(120,120)); 
-    float fx = 942.8;
-    float baseline = 54.8;
-    float units = 100;
+    float fx = 350.5 , cx = 348.233, cy = 193.477;
+    float baseline = 0.12;
+    float units = 1;
     Mat depth(image.rows, image.cols, CV_32F);
     for(int i = 0; i < image.rows; i++)
     {
         for(int j = 0; j < image.cols; j++)
         {
-        	if(invert)
+        	if(invert && ((255-image.at<uint8_t>(i,j)))!=0)
             	depth.at<float>(i,j)= float((fx * baseline) / (units *(255-image.at<uint8_t>(i,j))));
-        	else
+        	else if (((image.at<uint8_t>(i,j)))!=0)
         		depth.at<float>(i,j)= float((fx * baseline) / (units *(image.at<uint8_t>(i,j))));
+
         }
     }
 
@@ -72,7 +73,7 @@ int main(int argc, char** argv) {
     // real_Y = (y-320)*real_depth/focal_length
 
 //----------------------------------------------------------
-  OcTree tree (0.03);  
+  OcTree tree (0.01);  
   point3d origin (0,0,0);
   cout << "Reconstructing 3d map " << origin << " ..." << endl;
 
@@ -82,7 +83,8 @@ int main(int argc, char** argv) {
         for(int j = 0; j < image.cols; j++)
         {
         	float d = depth.at<float>(i,j);
-        	point3d point_on_surface (float((i-image.rows/2)*d/fx), float((j-image.cols/2)*d/fx),d );
+          //cout<<"row "<<i<<" col "<<j<<" depth "<<d<<endl;
+        	point3d point_on_surface (float((i-cy)*d/fx), float((j-cx)*d/fx),d );
             p.push_back(point_on_surface);
         }
     }

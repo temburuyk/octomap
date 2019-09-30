@@ -20,8 +20,8 @@ using namespace octomath;
 int main(int argc, char** argv) {
 
   // 1st Argument image location , 2nd argument inversion true or false
-	string image_name = "";
-	bool invert = false;
+  string image_name = "";
+  bool invert = false;
     if( argc < 2)
     {
        cout<<"Usign inbuilt image ";
@@ -29,10 +29,10 @@ int main(int argc, char** argv) {
     }
     else
     {
-    	image_name = argv[1]; 
+      image_name = argv[1]; 
     }
     if(argc==3)
-    	if(strcmp(argv[2],"true")==0) invert = true; 
+      if(strcmp(argv[2],"true")==0) invert = true; 
     Mat image;
     
     image = imread(image_name, 0);   // Read the file
@@ -51,10 +51,10 @@ int main(int argc, char** argv) {
     {
         for(int j = 0; j < image.cols; j++)
         {
-        	if(invert && ((255-image.at<uint8_t>(i,j)))!=0)
-            	depth.at<float>(i,j)= float((fx * baseline) / (units *(255-image.at<uint8_t>(i,j))));
-        	else if (((image.at<uint8_t>(i,j)))!=0)
-        		depth.at<float>(i,j)= float((fx * baseline) / (units *(image.at<uint8_t>(i,j))));
+          if(invert && ((255-image.at<uint8_t>(i,j)))>5)
+              depth.at<float>(i,j)= float((fx * baseline) / (units *(255-image.at<uint8_t>(i,j))));
+          else if (((image.at<uint8_t>(i,j)))>5&&((image.at<uint8_t>(i,j)))<85)
+            depth.at<float>(i,j)= float((fx * baseline) / (units *(image.at<uint8_t>(i,j))));
 
         }
     }
@@ -82,9 +82,9 @@ int main(int argc, char** argv) {
     {
         for(int j = 0; j < image.cols; j++)
         {
-        	float d = depth.at<float>(i,j);
+          float d = depth.at<float>(i,j);
           //cout<<"row "<<i<<" col "<<j<<" depth "<<d<<endl;
-        	point3d point_on_surface (float((i-cy)*d/fx), float((j-cx)*d/fx),d );
+          point3d point_on_surface (float((i-cy)*d/fx), float((j-cx)*d/fx),d );
             p.push_back(point_on_surface);
         }
     }

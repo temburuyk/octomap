@@ -31,7 +31,7 @@ int main(int argc, char** argv) {
   ofstream fout; 
   string line;
   fout.open("3d_points.txt");
-  int Image_location;
+  unsigned int Image_location;
     if( argc < 2)
     {
        cout<<"Command: ./shared_mem_bt (Argument Disparity Image physical address_";
@@ -39,7 +39,7 @@ int main(int argc, char** argv) {
     }
     else
     {
-      Image_location = boost::lexical_cast<int>(argv[1]);
+      Image_location = boost::lexical_cast<unsigned int >(argv[1]);
     }
 
     int fd = open ("/dev/mem", O_RDWR);
@@ -49,10 +49,11 @@ int main(int argc, char** argv) {
     }
     unsigned int res_mem_low_addr = Image_location;
     unsigned int res_mem_length   = 0x1000000; //32MB
-    unsigned char *ptr = mmap (NULL, res_mem_length, PROT_READ|PROT_WRITE, MAP_SHARED, fd, res_mem_low_addr);
+    unsigned char *ptr = (unsigned char *) mmap (NULL, res_mem_length, PROT_READ|PROT_WRITE, MAP_SHARED, fd, res_mem_low_addr);
 
-    printf ("INFO : /dev/mem mapped at [0x%08x]\n", (int) ptr);
+    printf ("INFO : /dev/mem mapped at [0x%08x]\n",  ptr);
 
+    //Calibration parameters of zed camera
     float fx = 350.5 , cx = 348.233, cy = 193.477;
     float baseline = 0.12;
     float units = 1;
@@ -63,9 +64,9 @@ int main(int argc, char** argv) {
   cout << "Reconstructing 3d map " << origin << " ..." << endl;
 
   Pointcloud p;
-  for(int i = 0; i < image.rows; i++)
+  for(int i = 0; i < IMG_HEIGHT; i++)
     {
-        for(int j = 0; j < image.cols; j++)
+        for(int j = 0; j < IMG_WIDTH; j++)
         {
 			if (((ptr[i*IMG_WIDTH + j]))>nearest_pixel&&((ptr[i*IMG_WIDTH + j]))<farthest_pixel)
             {

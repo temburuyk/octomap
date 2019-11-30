@@ -1,14 +1,14 @@
 
 #include <stdio.h>
-#include <string.h>
+#include <string>
 #include <octomap/octomap.h>
 #include <octomap/math/Utils.h>
 #include "testing.h"
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <iostream>
-
-
+#include <fstream> 
+#include <sstream>
 
 using namespace cv;
 using namespace std;
@@ -21,6 +21,9 @@ int main(int argc, char** argv) {
 
   // 1st Argument image location , 2nd argument inversion true or false
   string image_name = "";
+  ofstream fout; 
+  string line;
+  fout.open("3d_points.txt");
   bool invert = false;
     if( argc < 2)
     {
@@ -46,6 +49,7 @@ int main(int argc, char** argv) {
     float fx = 350.5 , cx = 348.233, cy = 193.477;
     float baseline = 0.12;
     float units = 1;
+    int nearest_pixel = 10, farthest_pixel = 85; 
     Mat depth(image.rows, image.cols, CV_32F);
     for(int i = 0; i < image.rows; i++)
     {
@@ -53,7 +57,7 @@ int main(int argc, char** argv) {
         {
           if(invert && ((255-image.at<uint8_t>(i,j)))>5)
               depth.at<float>(i,j)= float((fx * baseline) / (units *(255-image.at<uint8_t>(i,j))));
-          else if (((image.at<uint8_t>(i,j)))>5&&((image.at<uint8_t>(i,j)))<85)
+          else if (((image.at<uint8_t>(i,j)))>nearest_pixel&&((image.at<uint8_t>(i,j)))<farthest_pixel)
             depth.at<float>(i,j)= float((fx * baseline) / (units *(image.at<uint8_t>(i,j))));
 
         }
@@ -84,13 +88,26 @@ int main(int argc, char** argv) {
         {
           float d = depth.at<float>(i,j);
           //cout<<"row "<<i<<" col "<<j<<" depth "<<d<<endl;
-          point3d point_on_surface (float((i-cy)*d/fx), float((j-cx)*d/fx),d );
-            p.push_back(point_on_surface);
+          float x = float((i-cy)*d/fx), y = float((j-cx)*d/fx);
+          point3d point_on_surface (x , y, d);
+          std::ostringstream a,b,c;
+          a << x; b << y; c << d;
+          line = a.str() + "," + b.str() + "," + c.str(); 
+          if(invert && ((255-image.at<uint8_t>(i,j)))>5)
+            {
+              p.push_back(point_on_surface);
+              fout << line << endl;
+            }
+          else if (((image.at<uint8_t>(i,j))) > nearest_pixel && ((image.at<uint8_t>(i,j))) < farthest_pixel)
+            {
+              p.push_back(point_on_surface);
+              fout << line << endl;
+            } 
         }
     }
   tree.insertPointCloud(p, origin);
 
-
+  fout.close();
   cout << "Writing to custom_image.bt..." << endl;
   EXPECT_TRUE(tree.writeBinary("custom_image.bt"));
 

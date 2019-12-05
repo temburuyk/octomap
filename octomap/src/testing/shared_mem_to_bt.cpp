@@ -26,6 +26,7 @@ using namespace octomath;
 #define IMG_HEIGHT 480
 
 int main(int argc, char** argv) {
+  cout << argv[0] << " : Entering" << endl;
 
   // 1st Argument image address 
   ofstream fout; 
@@ -49,7 +50,23 @@ int main(int argc, char** argv) {
     }
     unsigned int res_mem_low_addr = Image_location;
     unsigned int res_mem_length   = 0x1000000; //32MB
-    unsigned char *ptr = (unsigned char *) mmap (NULL, res_mem_length, PROT_READ|PROT_WRITE, MAP_SHARED, fd, res_mem_low_addr);
+    cout <<  res_mem_low_addr;
+
+    unsigned int page_size   =  sysconf(_SC_PAGESIZE);
+    unsigned int page_addr   = (res_mem_low_addr & (~(page_size-1)));
+    unsigned int page_offset =  res_mem_low_addr - page_addr;
+    unsigned int rounded_length = page_size * ((res_mem_length + page_offset + (page_size - 1)) / page_size);
+
+    // void *mmap(void *addr, size_t length, int prot, int flags, int fd, off_t offset);
+    unsigned char *ptr = (unsigned char *) mmap (NULL, rounded_length, PROT_READ|PROT_WRITE, MAP_SHARED, fd, page_addr);
+    if (MAP_FAILED == ptr) {
+      perror ("mmap failed : ");
+      bool flag = true;
+      while (flag) {
+        sleep (1);
+      }
+    }
+    ptr += page_offset;
 
     printf ("INFO : /dev/mem mapped at [0x%08x]\n",  ptr);
 
@@ -59,30 +76,34 @@ int main(int argc, char** argv) {
     float units = 1;
     int nearest_pixel = 10, farthest_pixel = 85; 
 
-  OcTree tree (0.01);  
+  OcTree tree (0.02);  
   point3d origin (0,0,0);
   cout << "Reconstructing 3d map " << origin << " ..." << endl;
 
   Pointcloud p;
   for(int i = 0; i < IMG_HEIGHT; i++)
+  {
+    for(int j = 0; j < IMG_WIDTH; j++)
     {
-        for(int j = 0; j < IMG_WIDTH; j++)
-        {
 			if (((ptr[i*IMG_WIDTH + j]))>nearest_pixel&&((ptr[i*IMG_WIDTH + j]))<farthest_pixel)
-            {
+      {
             	float d = float((fx * baseline) / (units * (ptr[i*IMG_WIDTH + j])));
-		        float x = float((i-cy)*d/fx), y = float((j-cx)*d/fx);
-		        point3d point_on_surface (x , y, d);
-		        std::ostringstream a,b,c;
-		        a << x; b << y; c << d;
-		        line = a.str() + "," + b.str() + "," + c.str(); 
-              	p.push_back(point_on_surface);
-              	fout << line << endl;
-            } 
-        }
+		          float x = float((i-cy)*d/fx), y = float((j-cx)*d/fx);
+		          point3d point_on_surface (x , y, d);
+              p.push_back(point_on_surface);
+              #if 0
+		          std::ostringstream a,b,c;
+		          a << x; b << y; c << d;
+		          line = a.str() + "," + b.str() + "," + c.str(); 
+              fout << line << endl;
+              #endif
+      } 
     }
+  }
   tree.insertPointCloud(p, origin);
 
+  //munmap(ptr, res_mem_length);
+  //close(fd);
   fout.close();
   cout << "Writing to custom_image.bt..." << endl;
   EXPECT_TRUE(tree.writeBinary("custom_image.bt"));
@@ -92,7 +113,7 @@ int main(int argc, char** argv) {
 //------------------------------------------
 
 
-
+  cout << argv[0] << " : Exiting." << endl;
 
 
   return 0;

@@ -11,7 +11,7 @@
 #include <iostream>
 #include <fstream> 
 #include <sstream>
-#include <boost/lexical_cast.hpp>// for lexical_cast()
+//#include <boost/lexical_cast.hpp>// for lexical_cast()
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -40,7 +40,8 @@ int main(int argc, char** argv) {
     }
     else
     {
-      Image_location = boost::lexical_cast<unsigned int >(argv[1]);
+      //Image_location = boost::lexical_cast<unsigned int >(argv[1]);
+      Image_location = std::atoi( argv[1] );
     }
 
     int fd = open ("/dev/mem", O_RDWR);

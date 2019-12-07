@@ -38,6 +38,12 @@ if(BUILD_TESTING)
   TARGET_LINK_LIBRARIES(dep_image_to_bt_single_image octomap octomath ${OpenCV_LIBS})
 
 
+install(TARGETS
+  dep_image_to_bt_single_image
+  shared_mem_to_bt
+  dep_image_to_bt_multi_image
+  ${INSTALL_TARGETS_DEFAULT_ARGS}
+)
 
   # CTest tests below
 

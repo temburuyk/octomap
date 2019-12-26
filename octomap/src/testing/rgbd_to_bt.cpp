@@ -79,7 +79,7 @@ int main(int argc, char *argv[]) {
     queryBuffer.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     queryBuffer.memory = V4L2_MEMORY_USERPTR;
     //queryBuffer.index = 0;
-    queryBuffer.index = atoi(argv[1]);
+    queryBuffer.index = 0;
     if(ioctl(fd, VIDIOC_QUERYBUF, &queryBuffer) < 0){
         perror("Device did not return the buffer information, VIDIOC_QUERYBUF");
         return 1;
@@ -95,7 +95,7 @@ int main(int argc, char *argv[]) {
     bufferinfo.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     bufferinfo.memory = V4L2_MEMORY_USERPTR;
     //bufferinfo.index = 0;
-    bufferinfo.index = atoi(argv[1]);
+    bufferinfo.index = 0;
     bufferinfo.m.userptr = (unsigned long) bigBuffer;
     bufferinfo.length = length;
 
@@ -150,7 +150,7 @@ int main(int argc, char *argv[]) {
             float d = (float)DepthData[i*IMG_WIDTH + j]/1000.0;
             if ((d)>nearest_pixel&&((d))<farthest_pixel) {
                 float x = float((i-cy)*d/fx), y = float((j-cx)*d/fx);
-                cout<<x<<" "<<y<<" "<<d<<endl;
+                //cout<<x<<" "<<y<<" "<<d<<endl;
                 point3d point_on_surface (x , y, d);
                 p.push_back(point_on_surface);
             }
